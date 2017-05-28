@@ -1,4 +1,6 @@
-SCREEN_SIZE = (800, 600)
+SCALE = 2
+SCREEN_SIZE = (800*SCALE, 600*SCALE)
+FRAMERATE = 60
 
 from math import radians 
 
@@ -27,30 +29,31 @@ def resize(width, height):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    glOrtho(0, width, 0, height, -1, 1)
-    # gluPerspective(60.0, float(width)/height, .1, 1000.)
+    glOrtho(0, width/SCALE, 0, height/SCALE, -1, 1)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
-def render():
+def render(counter):
     glColor((255,255,255))
     glBegin(GL_QUADS)
     
-    glVertex((0,0,0))
-    glVertex((10,0,0))
-    glVertex((10,10,0))
-    glVertex((0,10,0))
+    glVertex((counter,0,0))
+    glVertex((100,0,0))
+    glVertex((100,100,0))
+    glVertex((0,100,0))
     
     glEnd()
     
 def run():
-    print "Hello"
     
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE, HWSURFACE|OPENGL|DOUBLEBUF)
     
     resize(*SCREEN_SIZE)
     
+    clock = pygame.time.Clock()
+    
+    counter = 0
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -60,7 +63,10 @@ def run():
                 return
             
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render()
+        render(counter)
+        counter = counter+5
         
         pygame.display.flip()
+        
+        clock.tick(FRAMERATE)
 run()

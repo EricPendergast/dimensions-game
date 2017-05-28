@@ -2,6 +2,8 @@ TODO:
 
 --Implement a better game loop
 
+--Create a player
+
 --Create a renderable  world
   - represent as a grid
   - OR represent as a list of hitboxes
@@ -11,7 +13,6 @@ TODO:
       that chunk
 
 --Find a way to use shaders
-  - This may mean not being able to use pygame
 
 --Add interpolation to avoid jitter, if it becomes an issue
 
