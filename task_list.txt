@@ -1,7 +1,5 @@
 TODO:
 
---Implement a better game loop
-
 --Create a player
 
 --Create a renderable  world
@@ -16,5 +14,8 @@ TODO:
 
 --Add interpolation to avoid jitter, if it becomes an issue
 
+--Plan out some puzzles
+
 DONE:
 --Get pygame working
+--Implement a better game loop

@@ -10,8 +10,7 @@ from OpenGL.GLU import *
 import pygame
 from pygame.locals import *
 
-# from gameobjects.matrix44 import *
-# from gameobjects.vector3 import *
+import state_manager
 
 def init():
     glEnable(GL_DEPTH_TEST)
@@ -33,7 +32,8 @@ def resize(width, height):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
-def render(counter):
+def render(stateManager, counter):
+    stateManager.render()
     glColor((255,255,255))
     glBegin(GL_QUADS)
     
@@ -53,20 +53,26 @@ def run():
     
     clock = pygame.time.Clock()
     
+    stateManager = state_manager.StateManager()
+    # For rendering testing
     counter = 0
+    
+    
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
-            if event.type == KEYUP and \
+            if event.type == KEYDOWN and \
                     (event.key == K_RETURN or event.key == K_ESCAPE):
                 return
-            
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render(counter)
+        render(stateManager, counter)
         counter = counter+5
         
         pygame.display.flip()
         
         clock.tick(FRAMERATE)
+        
+        
 run()
