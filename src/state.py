@@ -1,7 +1,7 @@
 import environment
 
 class _State:
-    def render(self):
+    def render(self, renderer):
         pass
     def update(self):
         pass
@@ -20,5 +20,5 @@ class _GameState(_State):
     def __init__(self):
         self.level = environment.Level()
     
-    def render(self):
-        self.level.render()
+    def render(self, renderer):
+        self.level.render(renderer)

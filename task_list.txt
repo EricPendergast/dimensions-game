@@ -4,17 +4,14 @@ TODO:
 
 --Create a renderable  world
   - represent as a grid
-  - OR represent as a list of hitboxes
-    - Figure out how to store the hitboxes
-    - Could be stored as a hashmap that contains a bunch of arrays whose keys
-      are the chunk they represent. And each array contains all the hitboxes in
-      that chunk
 
 --Find a way to use shaders
 
 --Add interpolation to avoid jitter, if it becomes an issue
 
 --Plan out some puzzles
+
+--Create a level editor
 
 DONE:
 --Get pygame working
