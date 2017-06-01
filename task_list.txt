@@ -2,8 +2,7 @@ TODO:
 
 --Create a player
 
---Create a renderable  world
-  - represent as a grid
+--Create a way to save levels
 
 --Find a way to use shaders
 
@@ -14,5 +13,8 @@ TODO:
 --Create a level editor
 
 DONE:
+
 --Get pygame working
 --Implement a better game loop
+--Create a renderable  world
+  - represent as a grid
