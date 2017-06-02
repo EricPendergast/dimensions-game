@@ -1,20 +1,25 @@
 TODO:
 
---Create a player
+-- Create a player
 
---Create a way to save levels
+-- Implement player control physics
 
---Find a way to use shaders
+-- Find a way to use shaders
 
---Add interpolation to avoid jitter, if it becomes an issue
+-- Plan out some puzzles
 
---Plan out some puzzles
+-- Create a level editor
 
---Create a level editor
+-- Draw a player sprite
+
+MAYBE:
+
+-- Add interpolation to avoid jitter, if it becomes an issue
 
 DONE:
 
---Get pygame working
---Implement a better game loop
---Create a renderable  world
-  - represent as a grid
+-- Get pygame working
+-- Implement a better game loop
+-- Create a renderable  world
+   - represent as a grid
+-- Create a way to save and load levels

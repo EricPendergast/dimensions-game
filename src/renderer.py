@@ -2,8 +2,8 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 class Renderer:
-    def drawRect(self, x, y, w, h):
-        glColor((255,255,255))
+    def drawRect(self, x, y, w, h, color=(255,255,255)):
+        glColor(color)
         glBegin(GL_QUADS)
 
         glVertex((x,y,0))

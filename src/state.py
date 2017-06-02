@@ -1,9 +1,9 @@
-import environment
+import physical.environment as environment
 
 class _State:
     def render(self, renderer):
         pass
-    def update(self):
+    def update(self, events):
         pass
     
 class StateFactory:
@@ -22,3 +22,6 @@ class _GameState(_State):
     
     def render(self, renderer):
         self.level.render(renderer)
+        
+    def update(self, inputHandler):
+        self.level.update(inputHandler)

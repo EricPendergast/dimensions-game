@@ -9,6 +9,7 @@ from pygame.locals import *
 import settings
 import state_manager
 import renderer
+import input
 
 def init():
     glEnable(GL_DEPTH_TEST)
@@ -30,7 +31,7 @@ def resize(width, height):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
-def render(stateManager, counter):
+def render(counter):
     glColor((255,255,255))
     glBegin(GL_QUADS)
     
@@ -55,21 +56,26 @@ def run():
     # Encapsulates OpenGL rendering
     renderHandler = renderer.Renderer()
     
+    # Encapsulates input from keyboard and (eventually) mouse
+    inputHandler = input.InputHandler()
+    
     # For rendering testing
     counter = 0
     
     
     while True:
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             if event.type == QUIT:
                 return
-            if event.type == KEYDOWN and \
-                    (event.key == K_RETURN or event.key == K_ESCAPE):
-                return
+        
+        if inputHandler.keyDown(K_RETURN) | inputHandler.keyDown(K_ESCAPE):
+            return
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render(stateManager, counter)
+        render(counter)
         stateManager.render(renderHandler)
+        stateManager.update(inputHandler)
         
         counter = counter+5
         
