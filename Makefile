@@ -1,5 +1,5 @@
 test: all
 
 all:
-	python src/game.py
+	python2 src/game.py
 	#python gltest.py

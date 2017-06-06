@@ -12,3 +12,6 @@ class Renderer:
         glVertex((x,y+h,0))
 
         glEnd()
+    
+    def drawAABB(self, aabb):
+        self.drawRect(aabb.min.x, aabb.min.y, aabb.width, aabb.height)
