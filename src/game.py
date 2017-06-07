@@ -31,16 +31,16 @@ def resize(width, height):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
-def render(counter):
-    glColor((255,255,255))
-    glBegin(GL_QUADS)
-    
-    glVertex((counter,0,0))
-    glVertex((100,0,0))
-    glVertex((100,100,0))
-    glVertex((0,100,0))
-    
-    glEnd()
+# def render(counter):
+#     glColor((255,255,255))
+#     glBegin(GL_QUADS)
+#
+#     glVertex((counter,0,0))
+#     glVertex((100,0,0))
+#     glVertex((100,100,0))
+#     glVertex((0,100,0))
+#
+#     glEnd()
     
 def run():
     
@@ -59,10 +59,6 @@ def run():
     # Encapsulates input from keyboard and (eventually) mouse
     inputHandler = input.InputHandler()
     
-    # For rendering testing
-    counter = 0
-    
-    
     while True:
         events = pygame.event.get()
         for event in events:
@@ -73,11 +69,9 @@ def run():
             return
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        render(counter)
         stateManager.render(renderHandler)
         stateManager.update(inputHandler)
         
-        counter = counter+5
         
         pygame.display.flip()
         

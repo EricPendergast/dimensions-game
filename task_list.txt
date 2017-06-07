@@ -1,6 +1,6 @@
 TODO:
 
--- Create a player
+-- Implement a world the player can interact with
 
 -- Implement player control physics
 
@@ -23,3 +23,4 @@ DONE:
 -- Create a renderable  world
    - represent as a grid
 -- Create a way to save and load levels
+-- Create a player

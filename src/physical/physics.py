@@ -1,9 +1,18 @@
 class Vec(object):
-    def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
+    def __init__(self, x=0, y=0, str=None):
+        if not str is None:
+            splitted = str.split(",")
+            self.x = float(splitted[0])
+            self.y = float(splitted[1])
+        else:
+            self.x = float(x)
+            self.y = float(y)
+        
+        assert type(self.x) is float
+        assert type(self.y) is float
         
     def dot(self, vec):
+        assert type(vec) is Vec
         return self.x*vec.x + self.y*vec.y
     
     def copy(self):
@@ -14,9 +23,11 @@ class Vec(object):
         return self.x*self.x + self.y*self.y
     
     def __add__(self, vec):
+        assert type(vec) is Vec
         return Vec(self.x + vec.x, self.y + vec.y)
     
     def __sub__(self, vec):
+        assert type(vec) is Vec
         return Vec(self.x - vec.x, self.y - vec.y)
     
     def __mul__(self, val):
@@ -28,14 +39,22 @@ class Vec(object):
     def __str__(self):
         return str((self.x,self.y))
 
+    def __eq__(self, vec):
+        return self.x == vec.x and self.y == vec.y
 
+    def __hash__(self):
+        return hash((self.x,self.y))
 
 # Contains all the information required to resolve a  collision
 class Manifold(object):
     def __init__(self, depth=0, normal=None, contact=None):
-        self.depth = depth
+        self.depth = float(depth)
         self.normal = Vec(0,1) if normal is None else normal
         self.contact = Vec(0,0) if contact is None else contact
+        
+        assert type(self.depth) is float
+        assert type(self.normal) is Vec
+        assert type(self.contact) is Vec
         
 
 # the AABB(Axis Aligned Bounding Box), is defined where 'min' is the lower left
@@ -44,14 +63,19 @@ class AABB(object):
     def __init__(self, min=None, max=None):
         self.min = Vec(0,0) if min is None else min
         self.max = Vec(0,0) if max is None else max
+        
+        assert type(self.min) is Vec
+        assert type(self.max) is Vec
     
     def is_valid(self):
         return self.min.x <= self.max.x and self.min.y <= self.max.y
     
     def intersect(self, other):
+        assert type(other) is AABB
         return self.get_intersection_box(other).is_valid()
     
     def get_intersection_box(self, other):
+        assert type(other) is AABB
         return AABB(
                 Vec(max(self.min.x, other.min.x), max(self.min.y, other.min.y)),
                 Vec(min(self.max.x, other.max.x), min(self.max.y, other.max.y)))
@@ -111,9 +135,9 @@ class AABB(object):
     
 
 class PhysicsBody(object):
-    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 1):
+    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = .1):
         # self.hitbox = Square(Vec(0,0), 30)
-        self.hitbox = AABB(Vec(0,0), Vec(30,30)) if hitbox is None else hitbox
+        self.hitbox = AABB(Vec(0,0), Vec(30,40)) if hitbox is None else hitbox
         self.pos = Vec() if pos is None else pos
         self.vel = Vec() if vel is None else vel
         self.acc = Vec() if acc is None else acc
@@ -141,6 +165,7 @@ class PhysicsBody(object):
     
     @pos.setter
     def pos(self, pos):
+        assert type(pos) is Vec
         self.hitbox.pos = pos
         
     def get_manifold(self, other):
@@ -163,24 +188,24 @@ class PhysicsBody(object):
 
 class PhysicsEnacter(object):
     # self.gravity is the acceleration due to gravity
-    def __init__(self, gravity=Vec(0,-.01)):
+    def __init__(self, gravity=Vec(0,-.1)):
         self.gravity = gravity
     
     # Enacts gravity, air resistance
     def enact_single(self, body):
-        # body.vel += self.gravity
+        body.vel += self.gravity
         body.update()
-        body.vel *= .95
+        # body.vel *= .95
     
     def enact_pair(self, bodyA, bodyB):
         manifold = bodyA.get_manifold(bodyB)
         
         if manifold.depth <= 0:
-            if bodyA.intersect(bodyB):
-                print "Something bad"
+            # if bodyA.intersect(bodyB):
+                # print "Something bad"
             return
         
-        print("Intersecting")
+        # print("Intersecting")
         
         # relative velocity of 'bodyA' and 'bodyB'
         rv = bodyB.vel - bodyA.vel
@@ -205,38 +230,13 @@ class PhysicsEnacter(object):
         # Penetration allowed before penetration correction starts
         k_slop = .01
         # Fraction of the penetration that is resolved each iteration
-        percent = .2
+        percent = .8
         
         correction = manifold.normal * -percent * (max(manifold.depth - k_slop, 0)/(1.0/bodyA.mass + 1.0/bodyB.mass))
         
         bodyA.pos -= correction / bodyA.mass
         bodyB.pos += correction / bodyB.mass
         
-    def enact_group(self, bodies=[]):
-        if bodies[0].intersect(bodies[1]):
-            print("Intersecting")
-        
-
-# class Rectangle(object):
-#     def __init__(self, vec=Vec(), width=0, height=0):
-#         self.pos = vec
-#         self.width = width
-#         self.height = height
-#
-#     def intersect(self, other):
-#         return self._intervalIntersect(self.pos.x, self.pos.x + self.width, other.pos.x, other.pos.x + other.width) and\
-#                 self._intervalIntersect(self.pos.y, self.pos.y + self.height, other.pos.y, other.pos.y + other.height)
-#
-#     def get_manifold(self, other):
-#         pass
-#         # depth =
-#     # Precondition: a<b, c<d
-#     # (a,b) is the first interval, (c,d) is the second
-#     def _intervalIntersect(self, a, b, c, d):
-#         # print((a,b,c,d))
-#         return abs(c+d-a-b) < b+d-a-c
-#
-# class Square(Rectangle):
-#     def __init__(self, vec=Vec(), size=0):
-#         Rectangle.__init__(self, vec, size, size)
-#
+    # def enact_group(self, bodies=[]):
+    #     if bodies[0].intersect(bodies[1]):
+    #         print("Intersecting")

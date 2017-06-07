@@ -38,3 +38,8 @@ class Player:
             self.body.acc.y = .1
         else:
             self.body.acc.y = 0
+            
+            
+        if inputHandler.keyDown(K_SPACE):
+            self.body.vel.y = 5
+            
