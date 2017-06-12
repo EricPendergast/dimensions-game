@@ -22,7 +22,7 @@ class Level:
         self.player = player.Player(Vec(40,40), mass=50)
         self.entities.append(self.player)
         
-        for i in range(10):
+        for i in range(5):
             self.entities.append(
                     simple_entity.SimpleEntity(
                     PhysicsBody(Vec(200,200 + 50*i))))
@@ -52,7 +52,7 @@ class Level:
         for entity in self.entities:
             self.physics.enact_single(entity.body)
         
-        for i in range(3):
+        for i in range(1):
             for entityA in self.entities:
                 for entityB in self.entities:
                     if not entityA is entityB:
@@ -92,12 +92,14 @@ class Level:
             
             manifold = body.hitbox.get_manifold(block_body.hitbox)
             
+            if manifold.depth <= 0:
+                continue
             # This is to prevent snagging when walking on blocks that are in a
             # row. If the collision is valid and the collision would push the
             # player in the direction of an adjacent block, the collision
             # should not occur. This is because this situation causes the
             # player to move in a way that would not happen in real physics
-            if manifold.depth > 0 and (block_pos + manifold.normal in self.grid):
+            if (block_pos + manifold.normal in self.grid):
                 continue
             
             self.physics.enact_pair(body, block_body)

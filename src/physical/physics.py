@@ -135,7 +135,7 @@ class AABB(object):
     
 
 class PhysicsBody(object):
-    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = .1):
+    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 0):
         # self.hitbox = Square(Vec(0,0), 30)
         self.hitbox = AABB(Vec(0,0), Vec(30,40)) if hitbox is None else hitbox
         self.pos = Vec() if pos is None else pos
@@ -145,15 +145,9 @@ class PhysicsBody(object):
         self.restitution = restitution
     
     def update(self):
-        # print("PLAYER" + str(self.vel))
         # apply acceleration
-        # self.vx += self.ax
-        # self.vy += self.ay
         self.vel += self.acc
         # apply velocity
-        # self.x += self.vx
-        # self.y += self.vy
-        # self.pos = self.pos + self.vel
         self.pos += self.vel
     
     def intersect(self, body):
