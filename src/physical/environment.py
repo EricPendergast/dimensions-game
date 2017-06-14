@@ -17,15 +17,18 @@ class Level:
         self.load("1.lvl")
         
         # self.grid[Vec(1,1)] = 1
-        # self.grid[Vec(14,1)] = 1
+        self.grid[Vec(20,1)] = 1
+        self.grid[Vec(26,1)] = 1
+        self.grid[Vec(32,1)] = 1
+        self.grid[Vec(41,1)] = 1
         self.entities = []
         self.player = player.Player(Vec(40,40), mass=50)
         self.entities.append(self.player)
         
-        for i in range(5):
-            self.entities.append(
-                    simple_entity.SimpleEntity(
-                    PhysicsBody(Vec(200,200 + 50*i))))
+        # for i in range(5):
+        #     self.entities.append(
+        #             simple_entity.SimpleEntity(
+        #             PhysicsBody(Vec(200,200 + 50*i))))
         
         self._render_queue_debug = []
         self.physics = PhysicsEnacter()

@@ -131,11 +131,9 @@ class AABB(object):
     
     
 
-    
-    
 
 class PhysicsBody(object):
-    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 0):
+    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 0, mu = 9):
         # self.hitbox = Square(Vec(0,0), 30)
         self.hitbox = AABB(Vec(0,0), Vec(30,40)) if hitbox is None else hitbox
         self.pos = Vec() if pos is None else pos
@@ -143,6 +141,7 @@ class PhysicsBody(object):
         self.acc = Vec() if acc is None else acc
         self.mass = mass
         self.restitution = restitution
+        self.mu = mu
     
     def update(self):
         # apply acceleration
@@ -182,7 +181,7 @@ class PhysicsBody(object):
 
 class PhysicsEnacter(object):
     # self.gravity is the acceleration due to gravity
-    def __init__(self, gravity=Vec(0,-.1)):
+    def __init__(self, gravity=Vec(0,-.3)):
         self.gravity = gravity
     
     # Enacts gravity, air resistance
@@ -212,7 +211,6 @@ class PhysicsEnacter(object):
         e = min(bodyA.restitution, bodyB.restitution)
         # impulse magnitude
         j = -(1.0 + e) * contactVel
-        
         j /= 1.0/bodyA.mass + 1.0/bodyB.mass
         
         impulse = manifold.normal * j 
@@ -220,12 +218,20 @@ class PhysicsEnacter(object):
         bodyA.vel -= impulse/bodyA.mass
         bodyB.vel += impulse/bodyB.mass
         
+        # 'impulse' is also the normal force. We can use this to derive the
+        # force of friction.
+        frictionDir = rv - manifold.normal*rv.dot(manifold.normal)
+        # friction = (impulse - (manifold.normal * impulse.dot(manifold.normal))) * min(bodyA.mu,  bodyB.mu)
+        friction = frictionDir * min(bodyA.mu,  bodyB.mu)
+        
+        bodyA.vel += friction/bodyA.mass
+        bodyB.vel -= friction/bodyB.mass
         # Penetration correction
         # Penetration allowed before penetration correction starts
         k_slop = .01
+        
         # Fraction of the penetration that is resolved each iteration
         percent = .8
-        
         correction = manifold.normal * -percent * (max(manifold.depth - k_slop, 0)/(1.0/bodyA.mass + 1.0/bodyB.mass))
         
         bodyA.pos -= correction / bodyA.mass
