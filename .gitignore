@@ -3,3 +3,4 @@
 *.DS_Store
 tags
 Session.vim
+*.vim
