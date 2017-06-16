@@ -1,9 +1,5 @@
 TODO:
 
--- Implement a world the player can interact with
-
--- Implement player control physics
-
 -- Find a way to use shaders
 
 -- Plan out some puzzles
@@ -24,3 +20,5 @@ DONE:
    - represent as a grid
 -- Create a way to save and load levels
 -- Create a player
+-- Implement player control physics
+-- Implement a world the player can collide with

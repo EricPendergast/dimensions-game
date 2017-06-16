@@ -133,9 +133,9 @@ class AABB(object):
 
 
 class PhysicsBody(object):
-    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 0, mu = 9):
+    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 1, mu = 9):
         # self.hitbox = Square(Vec(0,0), 30)
-        self.hitbox = AABB(Vec(0,0), Vec(30,40)) if hitbox is None else hitbox
+        self.hitbox = AABB(Vec(0,0), Vec(30,30)) if hitbox is None else hitbox
         self.pos = Vec() if pos is None else pos
         self.vel = Vec() if vel is None else vel
         self.acc = Vec() if acc is None else acc
