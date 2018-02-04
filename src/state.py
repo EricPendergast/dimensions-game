@@ -24,4 +24,6 @@ class _GameState(_State):
         self.level.render(renderer)
         
     def update(self, inputHandler):
-        self.level.update(inputHandler)
+        self.level.update_player(inputHandler)
+
+

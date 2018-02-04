@@ -1,18 +1,32 @@
+from Queue import Queue
+import math
+
 class Vec(object):
-    def __init__(self, x=0, y=0, str=None):
-        if not str is None:
-            splitted = str.split(",")
-            self.x = float(splitted[0])
-            self.y = float(splitted[1])
-        else:
-            self.x = float(x)
-            self.y = float(y)
+    __slots__ = ['x','y']
+    
+    @classmethod
+    def init_from_string(cls, str):
+        splitted = str.split(",")
+        x = float(splitted[0])
+        y = float(splitted[1])
+        vec = Vec.create(x,y)
+        return vec
+    
+    @classmethod
+    def init_from_tupple(cls, tupple):
+        x = tupple[0]
+        y = tupple[1]
+        vec = Vec.create(x,y)
+        return vec
+        
+    def __init__(self, x=0, y=0):
+        self.x = float(x)
+        self.y = float(y)
         
         assert type(self.x) is float
         assert type(self.y) is float
         
     def dot(self, vec):
-        assert type(vec) is Vec
         return self.x*vec.x + self.y*vec.y
     
     def copy(self):
@@ -22,12 +36,21 @@ class Vec(object):
     def magSquared(self):
         return self.x*self.x + self.y*self.y
     
+    def round(self):
+        self.x = int(round(self.x))
+        self.y = int(round(self.y))
+        return self
+    
+    def normalize(self):
+        mag = math.sqrt(self.magSquared())
+        self.x /= mag
+        self.y /= mag
+        return self
+    
     def __add__(self, vec):
-        assert type(vec) is Vec
         return Vec(self.x + vec.x, self.y + vec.y)
     
     def __sub__(self, vec):
-        assert type(vec) is Vec
         return Vec(self.x - vec.x, self.y - vec.y)
     
     def __mul__(self, val):
@@ -38,7 +61,9 @@ class Vec(object):
     
     def __str__(self):
         return str((self.x,self.y))
-
+    
+    def __repr__(self):
+        return str(self)
     def __eq__(self, vec):
         return self.x == vec.x and self.y == vec.y
 
@@ -131,9 +156,8 @@ class AABB(object):
     
     
 
-
 class PhysicsBody(object):
-    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=50, restitution = 1, mu = 9):
+    def __init__(self, pos=None, vel=None, acc=None, hitbox=None, mass=10, restitution = 1, mu = 9):
         # self.hitbox = Square(Vec(0,0), 30)
         self.hitbox = AABB(Vec(0,0), Vec(30,30)) if hitbox is None else hitbox
         self.pos = Vec() if pos is None else pos
@@ -158,7 +182,6 @@ class PhysicsBody(object):
     
     @pos.setter
     def pos(self, pos):
-        assert type(pos) is Vec
         self.hitbox.pos = pos
         
     def get_manifold(self, other):

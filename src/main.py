@@ -42,7 +42,7 @@ def resize(width, height):
 #
 #     glEnd()
     
-def run():
+def main():
     
     pygame.init()
     screen = pygame.display.set_mode(settings.SCREEN_SIZE, HWSURFACE|OPENGL|DOUBLEBUF)
@@ -53,10 +53,8 @@ def run():
     
     stateManager = state_manager.StateManager()
     
-    # Encapsulates OpenGL rendering
     renderHandler = renderer.Renderer()
     
-    # Encapsulates input from keyboard and (eventually) mouse
     inputHandler = input.InputHandler()
     
     while True:
@@ -78,4 +76,5 @@ def run():
         clock.tick(settings.FRAMERATE)
         
         
-run()
+if __name__ == "__main__":
+    main()
