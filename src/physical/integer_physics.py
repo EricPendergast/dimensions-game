@@ -2,10 +2,12 @@ from immutable_vector import ImmutableVec
 import copy
 
 class Block(object):
-    def __init__(self, grid, pos):
-        pos = to_immutable_vec(pos)
-        grid[pos] = self
-        self.pos = pos
+    pass
+
+class StationaryBlock(Block):
+    __slots__ = ['pos']
+    def __init__(self, pos):
+        self.pos = ImmutableVec.create_dup(pos)
     
     # does not modify grid
     def update(self, grid, future_grid):
@@ -16,9 +18,9 @@ class Block(object):
         renderer.drawAABB(self._get_physics_body(square).hitbox)
         
         
-class GravityBlock(object):
-    def __init__(self, grid, pos, vel):
-        grid[pos] = self
+class GravityBlock(Block):
+    __slots__ = ['pos', 'vel']
+    def __init__(self, pos, vel):
         self.pos = ImmutableVec.create_dup(pos)
         self.vel = ImmutableVec.create_dup(vel)
     
@@ -26,34 +28,36 @@ class GravityBlock(object):
     def update(self, grid, future_buckets):
         new_self = copy.copy(self)
         for p in get_path(new_self.pos, new_self.pos + new_self.vel):
-            future_buckets.put(p, GravityBlock({}, p, ImmutableVec(0,0)))
+            future_buckets.put(p, GravityBlock(p, ImmutableVec(0,0)))
         
         new_self.pos += self.vel
         new_self.vel -= ImmutableVec(0,1)
         future_buckets.put(new_self.pos, new_self)
 
-# This block indicates whether a spot is occupied at some point between this
-# tick and the next
-class Path(object):
-    pass
 
-class MomentumBlock(object):
-    pass
-
-class StationaryBlock(Block):
-    pass
+def init_in_grid(grid, block):
+    grid[int(block.pos.x)][int(block.pos.y)] = block
+    return block
+    
 
 # Represents a spot in the grid which can contain more than one block at a
 # time. 
-class Bucket(object):
-    def __init__(self, block):
-        self._bucket = {block}
+class BlockBucket(object):
+    def __init__(self):
+        self._bucket = set()
     
     def collapse(self):
+        e = None
+        # Returns an arbitrary block from the bucket, None if the bucket is empty
         for e in self._bucket:
-            return e
+            break
+        return e
+        
     def add(self, block):
         self._bucket.add(block)
+    
+    def clear(self):
+        self._bucket.clear()
 
 
 def get_path(a, b):
@@ -80,9 +84,3 @@ def get_path(a, b):
     
     return path
     
-
-def to_immutable_vec(vec):
-    if type(vec) is ImmutableVec:
-        return vec
-    else:
-        return ImmutableVec.create(vec.x, vec.y)

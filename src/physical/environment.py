@@ -30,9 +30,7 @@ class Level:
         # self._render_queue_debug = []
         self.physics = PhysicsEnacter()
         # self.save("1.lvl")
-        
-        for key in self.grid.current:
-            assert(type(key) is Vec)
+    
     
     def render(self, renderer):
         self.grid.render(renderer)
@@ -62,74 +60,90 @@ class Level:
     
     def _collide_with_grid(self, body):
         assert type(body) is PhysicsBody
-        for block_pos in self.grid.current:
-            block_body = self.grid._get_physics_body(block_pos)
-            
-            manifold = body.hitbox.get_manifold(block_body.hitbox)
-            
-            if manifold.depth <= 0:
-                continue
-            
-            # Prevents snagging when walking on blocks that are in a row.
-            # If the collision is valid and the collision would push the player
-            # in the direction of an adjacent block, the collision should not
-            # occur.
-            if (block_pos + manifold.normal in self.grid.current):
-                continue
-            
-            self.physics.enact_pair(body, block_body)
+        
+        center_x = int(self.player.body.pos.x)/settings.GRID_SIZE
+        center_y = int(self.player.body.pos.y)/settings.GRID_SIZE
+        block_pos = Vec(0,0)
+        for x in xrange(center_x - 5, center_x + 5):
+            for y in xrange(center_y - 5, center_y + 5):
+                block_pos.x, block_pos.y = x,y
+                
+                if not self.grid.contains_block(block_pos):
+                    continue
+                
+                block_body = self.grid._get_physics_body(block_pos)
+                
+                manifold = body.hitbox.get_manifold(block_body.hitbox)
+                
+                if manifold.depth <= 0:
+                    continue
+                
+                # Prevents snagging when walking on blocks that are in a row.
+                # If the collision is valid and the collision would push the player
+                # in the direction of an adjacent block, the collision should not
+                # occur.
+                if (self.grid.contains_block(block_pos + manifold.normal)):
+                    continue
+                
+                self.physics.enact_pair(body, block_body)
             
 
-# grid contains all the blocks in the current level. If a coordinate is
-# not one of the keys in grid, it is assumed to be air
+
 class Grid(object):
-            
     def __init__(self):
-        self._grids = [{}, {}]
-        self._current_grid = 0
+        self.width = 100
+        self.height = 100
         
-        self.valid_area = (0,0,100,100)
-        self.future_buckets = self.FutureBuckets(self.valid_area[2], self.valid_area[3])
+        self.current = [[None for i in range(self.height)] for j in range(self.width)]
+        self.future_buckets = self.FutureBuckets(self.width, self.height)
         
         # Block(self.current, Vec(2,1))
-        GravityBlock(self.current, Vec(2,2), Vec(5,5))
+        init_in_grid(self.current, GravityBlock(Vec(2,2), Vec(5,5)))
         
-        for key in self.current:
-            assert(type(key) is Vec)
     
+    def contains_block(self, pos):
+        return pos.x >= 0 and pos.x < self.width and pos.y >= 0 and pos.y < self.height and \
+                (self.current[int(pos.x)][int(pos.y)] is not None)
+                
     def update(self):
+        assert self.current != {}
         self.future_buckets.clear()
         
-        for x in range(self.valid_area[0], self.valid_area[2]):
-            for y in range(self.valid_area[1], self.valid_area[3]):
-                if Vec(x,y) in self.current:
-                    self.current[Vec(x,y)].update(self.current, self.future_buckets)
+        # sending each block in 'current' to buckets in 'future_buckets'
+        for x in xrange(self.width):
+            for y in xrange(self.height):
+                block = self.current[x][y]
+                if block is not None:
+                    block.update(self.current, self.future_buckets)
                     
-        self.current.clear()
+        # clearing 'current'
+        for x in xrange(self.width):
+            for y in xrange(self.height):
+                self.current[x][y] = None
         
-        # Each bucket contains multiple things, so each needs to be collapsed
-        # into just one before it is put into the 
-        for pos, bucket in self.future_buckets._buckets.iteritems():
-            self.current[pos] = bucket.collapse()
+        # Each bucket contains multiple blocks, so each needs to be collapsed
+        # into just one before it is put into 'current'
+        for x in xrange(self.width):
+            for y in xrange(self.height):
+                self.current[x][y] = self.future_buckets._buckets_mat[x][y].collapse()
                     
                     
     def render(self, renderer):
-        for square in self.current:
-            renderer.drawAABB(self._get_physics_body(square).hitbox)
+        renderer.begin_quads()
+        for x in xrange(self.width):
+            for y in xrange(self.height):
+                block = self.current[x][y]
+                if block is not None:
+                    # assert issubclass(type(block), Block)
+                    renderer.drawAABB(self._get_physics_body(block.pos).hitbox, False)
+        renderer.end()
         
         
-    @property
-    def current(self):
-        return self._grids[self._current_grid]
-    @property
-    def future(self):
-        return self._grids[(self._current_grid + 1)%2]
-    
     # returns the physics body of the block in the grid with location 'pos'
     def _get_physics_body(self, pos):
         ret = PhysicsBody(hitbox=AABB())
         # if pos is not in the grid, it is air
-        if pos in self.current:
+        if self.current[int(pos.x)][int(pos.y)] is not None:
             ret.hitbox.max = Vec(settings.GRID_SIZE, settings.GRID_SIZE)
             ret.pos = pos*settings.GRID_SIZE
             ret.mass = 1000000
@@ -140,20 +154,16 @@ class Grid(object):
         def __init__(self, width, height):
             self.width = width;
             self.height = height;
-            self._buckets = {}
-            # self._buckets_mat = [[Bucket() for i in range(height)] for j in range(width)]
+            self._buckets_mat = [[BlockBucket() for i in range(self.height)] for j in range(self.width)]
             
         def put(self, pos, thing):
-            pos = ImmutableVec.create_dup(pos)
-            
-            if pos not in self._buckets:
-                self._buckets[pos] = Bucket(thing)
-            else:
-                self._buckets[pos].add(thing)
+            if self.in_range(pos):
+                self._buckets_mat[int(pos.x)][int(pos.y)].add(thing)
         
         def clear(self):
-            for pos, bucket in self._buckets.iteritems():
-                ImmutableVec.done(pos)
-            self._buckets.clear()
-            
-        
+            for x in xrange(self.width):
+                for y in xrange(self.height):
+                    self._buckets_mat[x][y].clear()
+                    
+        def in_range(self, pos):
+            return pos.x >= 0 and pos.x < self.width and pos.y >= 0 and pos.y < self.height
