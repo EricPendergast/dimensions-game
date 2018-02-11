@@ -21,6 +21,8 @@ class Level:
         
         self.grid = Grid()
         
+        init_in_grid(self.grid.current, Vec(2,2), GravityBlock, Vec(5,5))
+        
         # self.grid[Vec(20,1)] = 1
         # self.grid[Vec(26,1)] = 1
         # self.grid[Vec(32,1)] = 1
@@ -91,24 +93,21 @@ class Level:
 
 class Grid(object):
     def __init__(self):
-        self.width = 100
-        self.height = 100
+        self.width = 20
+        self.height = 20
         
-        self.current = [[None for i in range(self.height)] for j in range(self.width)]
+        self.current = [[Block(Air, pos=Vec(j,i)) for i in range(self.height)] for j in range(self.width)]
         self.future_buckets = self.FutureBuckets(self.width, self.height)
         
         # Block(self.current, Vec(2,1))
-        init_in_grid(self.current, GravityBlock(Vec(2,2), Vec(5,5)))
         
     
     def contains_block(self, pos):
         return pos.x >= 0 and pos.x < self.width and pos.y >= 0 and pos.y < self.height and \
-                (self.current[int(pos.x)][int(pos.y)] is not None)
+                (self.current[int(pos.x)][int(pos.y)].BlockType is not Air)
                 
     def update(self):
-        assert self.current != {}
         self.future_buckets.clear()
-        
         # sending each block in 'current' to buckets in 'future_buckets'
         for x in xrange(self.width):
             for y in xrange(self.height):
@@ -119,13 +118,13 @@ class Grid(object):
         # clearing 'current'
         for x in xrange(self.width):
             for y in xrange(self.height):
-                self.current[x][y] = None
+                self.current[x][y].init(Air)
         
         # Each bucket contains multiple blocks, so each needs to be collapsed
         # into just one before it is put into 'current'
         for x in xrange(self.width):
             for y in xrange(self.height):
-                self.current[x][y] = self.future_buckets._buckets_mat[x][y].collapse()
+                 self.future_buckets._buckets_mat[x][y].collapse(self.current[x][y])
                     
                     
     def render(self, renderer):
@@ -133,7 +132,7 @@ class Grid(object):
         for x in xrange(self.width):
             for y in xrange(self.height):
                 block = self.current[x][y]
-                if block is not None:
+                if block.BlockType is not Air:
                     # assert issubclass(type(block), Block)
                     renderer.drawAABB(self._get_physics_body(block.pos).hitbox, False)
         renderer.end()
@@ -142,7 +141,7 @@ class Grid(object):
     # returns the physics body of the block in the grid with location 'pos'
     def _get_physics_body(self, pos):
         ret = PhysicsBody(hitbox=AABB())
-        # if pos is not in the grid, it is air
+        
         if self.current[int(pos.x)][int(pos.y)] is not None:
             ret.hitbox.max = Vec(settings.GRID_SIZE, settings.GRID_SIZE)
             ret.pos = pos*settings.GRID_SIZE
@@ -154,11 +153,11 @@ class Grid(object):
         def __init__(self, width, height):
             self.width = width;
             self.height = height;
-            self._buckets_mat = [[BlockBucket() for i in range(self.height)] for j in range(self.width)]
+            self._buckets_mat = [[BlockBucket(Vec(j,i)) for i in range(self.height)] for j in range(self.width)]
             
-        def put(self, pos, thing):
+        def put(self, pos, BlockType, *args, **kwargs):
             if self.in_range(pos):
-                self._buckets_mat[int(pos.x)][int(pos.y)].add(thing)
+                self._buckets_mat[int(pos.x)][int(pos.y)].put(BlockType, *args, **kwargs)
         
         def clear(self):
             for x in xrange(self.width):
@@ -167,3 +166,6 @@ class Grid(object):
                     
         def in_range(self, pos):
             return pos.x >= 0 and pos.x < self.width and pos.y >= 0 and pos.y < self.height
+        
+        def __repr__(self):
+            return str(self._buckets_mat)

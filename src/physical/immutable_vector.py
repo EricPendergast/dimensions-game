@@ -5,7 +5,7 @@ import math
 
 class ImmutableVec(object):
     __slots__ = ['x','y']
-    pool = Queue(maxsize=0)
+    # pool = Queue(maxsize=0)
         
     # Making this class immutable
     def __setattr__(self, *args):
@@ -20,14 +20,14 @@ class ImmutableVec(object):
         
         return ImmutableVec(x,y)
     
-        if cls.pool.empty():
-            return ImmutableVec(x,y)
-        else:
-            vec = cls.pool.get()
-            # Changing an "immutable" object
-            object.__setattr__(vec, "x", float(x))
-            object.__setattr__(vec, "y", float(y))
-            return vec
+        # if cls.pool.empty():
+        #     return ImmutableVec(x,y)
+        # else:
+        #     vec = cls.pool.get()
+        #     # Changing an "immutable" object
+        #     object.__setattr__(vec, "x", float(x))
+        #     object.__setattr__(vec, "y", float(y))
+        #     return vec
     
     # Creates a duplicate of 'vec', as an ImmutableVec
     @classmethod
